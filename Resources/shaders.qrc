@@ -1,0 +1,11 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>shaders/mesh.vert</file>
+        <file>shaders/mesh.frag</file>
+        <file>shaders/wire.vert</file>
+        <file>shaders/wire.frag</file>
+        <file>shaders/axes.vert</file>
+        <file>shaders/axes.frag</file>
+    </qresource>
+</RCC>
