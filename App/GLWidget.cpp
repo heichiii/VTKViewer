@@ -33,29 +33,81 @@ GLWidget::~GLWidget()
     doneCurrent();
 }
 
-void GLWidget::initializeGL()
-{
+
+void GLWidget::initializeGL() {
     initializeOpenGLFunctions();
-    
+
+    // 设置清屏颜色和深度
     glClearColor(0.15f, 0.15f, 0.18f, 1.0f);
+    glClearDepth(1.0f);
+
+    // 启用深度测试（3D渲染必需）
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE);
-    glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    glEnable(GL_POINT_SMOOTH);  // 启用点平滑
-    glEnable(GL_BLEND);         // 启用混合以支持平滑
+    glDepthFunc(GL_LESS);  // 明确指定深度测试函数
+
+    // 启用面剔除（提高性能）
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);  // 逆时针为正面
+
+    // 多重采样（如果可用）
+    GLint samples = 0;
+    glGetIntegerv(GL_SAMPLES, &samples);
+    if (samples > 0) {
+        glEnable(GL_MULTISAMPLE);
+    }
+
+    // 混合（用于透明效果）
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-    
-    // Polygon offset for wireframe overlay
+    // 预乘alpha混合（更好）
+    // glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+    // 允许程序控制点大小
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
+    // 多边形偏移（防止深度冲突）
+    glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1.0f, 1.0f);
-    
+
+    // 检查OpenGL错误
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        qDebug() << "OpenGL Error during initialization:" << err;
+    }
+
     setupShaders();
     setupBuffers();
-    
-    emit statusMessage("OpenGL " + QString((const char*)glGetString(GL_VERSION)));
+
+    // 输出OpenGL信息
+    qDebug() << "OpenGL Version:" << (const char*)glGetString(GL_VERSION);
+    qDebug() << "GLSL Version:" << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    qDebug() << "Renderer:" << (const char*)glGetString(GL_RENDERER);
+    qDebug() << "Vendor:" << (const char*)glGetString(GL_VENDOR);
 }
+// void GLWidget::initializeGL()
+// {
+//     initializeOpenGLFunctions();
+//
+//     glClearColor(0.15f, 0.15f, 0.18f, 1.0f);
+//     glEnable(GL_DEPTH_TEST);
+//     glEnable(GL_MULTISAMPLE);
+//     // glEnable(GL_LINE_SMOOTH);
+//     glEnable(GL_PROGRAM_POINT_SIZE);
+//     // glEnable(GL_POINT_SMOOTH);  // 启用点平滑 弃用
+//     glEnable(GL_BLEND);         // 启用混合以支持平滑
+//     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//     // glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+//     // glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+//
+//     // Polygon offset for wireframe overlay
+//     glPolygonOffset(1.0f, 1.0f);
+//
+//     setupShaders();
+//     setupBuffers();
+//
+//     emit statusMessage("OpenGL " + QString((const char*)glGetString(GL_VERSION)));
+// }
 
 void GLWidget::setupShaders()
 {
