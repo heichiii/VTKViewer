@@ -53,7 +53,7 @@ public:
     void setActiveDataArray(const QString& name);
     void setColorMode(ColorMode mode);
     void setPointSize(int size);
-    void setLineWidth(int width);
+    // void setLineWidth(int width);
     
     QPair<int64_t, int64_t> getMeshStats() const;
     QStringList getPointDataArrayNames() const;
@@ -116,7 +116,7 @@ private:
     ColorMode m_colorMode = Viridis;
     QString m_activeDataArray;
     float m_pointSize = 5.0f;
-    float m_lineWidth = 1.0f;
+    // float m_lineWidth = 1.0f;
     
     // Colors
     QVector3D m_solidColor = QVector3D(0.7f, 0.7f, 0.8f);

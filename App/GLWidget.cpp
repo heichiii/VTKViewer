@@ -314,7 +314,7 @@ void GLWidget::renderMesh()
             m_wireShader->bind();
             m_wireShader->setUniformValue("mvp", mvp);
             m_wireShader->setUniformValue("color", m_wireColor);
-            glLineWidth(m_lineWidth);
+            // glLineWidth(m_lineWidth);
             
             m_lineIndexBuffer.bind();
             glDrawElements(GL_LINES, static_cast<GLsizei>(m_meshData.lineIndices.size()), 
@@ -375,7 +375,7 @@ void GLWidget::renderMesh()
             m_wireShader->bind();
             m_wireShader->setUniformValue("mvp", mvp);
             m_wireShader->setUniformValue("color", m_wireColor);
-            glLineWidth(m_lineWidth);
+            // glLineWidth(m_lineWidth);
             
             m_lineIndexBuffer.bind();
             glDrawElements(GL_LINES, static_cast<GLsizei>(m_meshData.lineIndices.size()), 
@@ -556,11 +556,11 @@ void GLWidget::setPointSize(int size)
     update();
 }
 
-void GLWidget::setLineWidth(int width)
-{
-    m_lineWidth = static_cast<float>(width);
-    update();
-}
+// void GLWidget::setLineWidth(int width)
+// {
+//     m_lineWidth = static_cast<float>(width);
+//     update();
+// }
 
 QPair<int64_t, int64_t> GLWidget::getMeshStats() const
 {

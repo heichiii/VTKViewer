@@ -73,12 +73,12 @@ void MainWindow::setupDockWidget()
     renderLayout->addWidget(pointSizeLabel);
     renderLayout->addWidget(m_pointSizeSlider);
     
-    QLabel* lineWidthLabel = new QLabel("线宽:");
-    m_lineWidthSlider = new QSlider(Qt::Horizontal);
-    m_lineWidthSlider->setRange(1, 10);
-    m_lineWidthSlider->setValue(1);
-    renderLayout->addWidget(lineWidthLabel);
-    renderLayout->addWidget(m_lineWidthSlider);
+    // QLabel* lineWidthLabel = new QLabel("线宽:");
+    // m_lineWidthSlider = new QSlider(Qt::Horizontal);
+    // m_lineWidthSlider->setRange(1, 10);
+    // m_lineWidthSlider->setValue(1);
+    // renderLayout->addWidget(lineWidthLabel);
+    // renderLayout->addWidget(m_lineWidthSlider);
     
     layout->addWidget(renderGroup);
     
@@ -133,7 +133,7 @@ void MainWindow::setupConnections()
             this, &MainWindow::onDataArrayChanged);
     
     connect(m_pointSizeSlider, &QSlider::valueChanged, m_glWidget, &GLWidget::setPointSize);
-    connect(m_lineWidthSlider, &QSlider::valueChanged, m_glWidget, &GLWidget::setLineWidth);
+    // connect(m_lineWidthSlider, &QSlider::valueChanged, m_glWidget, &GLWidget::setLineWidth);
     
     connect(m_glWidget, &GLWidget::statusMessage, this, &MainWindow::updateStatusBar);
     connect(m_glWidget, &GLWidget::meshLoaded, this, &MainWindow::onLoadingFinished);

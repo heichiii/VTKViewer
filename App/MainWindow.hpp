@@ -59,7 +59,7 @@ private:
     QComboBox* m_colorModeCombo;
     QComboBox* m_dataArrayCombo;
     QSlider* m_pointSizeSlider;
-    QSlider* m_lineWidthSlider;
+    // QSlider* m_lineWidthSlider;
     
     // Status
     QProgressBar* m_progressBar;
