@@ -29,11 +29,17 @@ public:
         Surface = 4  // 双面渲染模式，用于查看内部
     };
 
-    enum ColorMode {
+    enum PhysicalData {
         SolidColor = 0,
         PointData = 1,
         CellData = 2,
         NormalColor = 3
+    };
+
+    enum ColorMode {
+        Viridis = 0,
+        Jet = 1,
+        Rainbow = 2
     };
 
     explicit GLWidget(QWidget *parent = nullptr);
@@ -43,8 +49,9 @@ public:
     void resetCamera();
     
     void setRenderMode(RenderMode mode);
-    void setColorMode(ColorMode mode);
+    void setPhysicalValue(PhysicalData mode);
     void setActiveDataArray(const QString& name);
+    void setColorMode(ColorMode mode);
     void setPointSize(int size);
     void setLineWidth(int width);
     
@@ -105,7 +112,8 @@ private:
     
     // Render settings
     RenderMode m_renderMode = Solid;
-    ColorMode m_colorMode = SolidColor;
+    PhysicalData m_physicalData = SolidColor;
+    ColorMode m_colorMode = Viridis;
     QString m_activeDataArray;
     float m_pointSize = 5.0f;
     float m_lineWidth = 1.0f;
@@ -128,6 +136,7 @@ private:
     GLint m_normalMatrixLoc = -1;
     GLint m_lightDirLoc = -1;
     GLint m_solidColorLoc = -1;
+    GLint m_physicalDataLoc = -1;
     GLint m_colorModeLoc = -1;
     GLint m_twoSidedLightingLoc = -1;
 };

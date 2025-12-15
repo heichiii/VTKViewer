@@ -5,7 +5,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    setWindowTitle("Simple VTK Viewer - Qt6 + OpenGL 4");
+    setWindowTitle("Simple VTK Viewer");
     setupUI();
     setupToolBar();
     setupDockWidget();
@@ -34,13 +34,13 @@ void MainWindow::setupToolBar()
     m_toolBar = addToolBar("Main Toolbar");
     m_toolBar->setMovable(false);
     
-    m_openAction = m_toolBar->addAction("📂 Open File");
+    m_openAction = m_toolBar->addAction("📂 打开文件");
     m_openAction->setShortcut(QKeySequence::Open);
     m_openAction->setToolTip("Open VTK file (Ctrl+O)");
     
     m_toolBar->addSeparator();
     
-    m_resetCameraAction = m_toolBar->addAction("🎯 Reset Camera");
+    m_resetCameraAction = m_toolBar->addAction("🎯 重置视角");
     m_resetCameraAction->setShortcut(QKeySequence(Qt::Key_R));
     m_resetCameraAction->setToolTip("Reset camera to fit model (R)");
 }
@@ -55,25 +55,25 @@ void MainWindow::setupDockWidget()
     layout->setSpacing(10);
     
     // Render Mode Group
-    QGroupBox* renderGroup = new QGroupBox("Render Mode");
+    QGroupBox* renderGroup = new QGroupBox("渲染模式");
     QVBoxLayout* renderLayout = new QVBoxLayout(renderGroup);
     
     m_renderModeCombo = new QComboBox();
-    m_renderModeCombo->addItem("Solid (Filled)", 0);
-    m_renderModeCombo->addItem("Wireframe", 1);
-    m_renderModeCombo->addItem("Points", 2);
-    m_renderModeCombo->addItem("Solid + Wireframe", 3);
-    m_renderModeCombo->addItem("Surface (双面)", 4);  // 新增：双面表面渲染
+    m_renderModeCombo->addItem("实体", 0);//solid
+    m_renderModeCombo->addItem("线框", 1);//Wireframe
+    m_renderModeCombo->addItem("点云", 2);//Points
+    m_renderModeCombo->addItem("实体+线框", 3);//Solid Wireframe
+    m_renderModeCombo->addItem("表面", 4);  // Surface双面表面渲染
     renderLayout->addWidget(m_renderModeCombo);
     
-    QLabel* pointSizeLabel = new QLabel("Point Size:");
+    QLabel* pointSizeLabel = new QLabel("点大小:");
     m_pointSizeSlider = new QSlider(Qt::Horizontal);
     m_pointSizeSlider->setRange(1, 20);
     m_pointSizeSlider->setValue(5);
     renderLayout->addWidget(pointSizeLabel);
     renderLayout->addWidget(m_pointSizeSlider);
     
-    QLabel* lineWidthLabel = new QLabel("Line Width:");
+    QLabel* lineWidthLabel = new QLabel("线宽:");
     m_lineWidthSlider = new QSlider(Qt::Horizontal);
     m_lineWidthSlider->setRange(1, 10);
     m_lineWidthSlider->setValue(1);
@@ -82,25 +82,36 @@ void MainWindow::setupDockWidget()
     
     layout->addWidget(renderGroup);
     
-    // Color Mode Group
-    QGroupBox* colorGroup = new QGroupBox("Color Mode");
-    QVBoxLayout* colorLayout = new QVBoxLayout(colorGroup);
+    // Physical Value Group
+    QGroupBox* physicalGroup = new QGroupBox("物理量选择");
+    QVBoxLayout* physicalLayout = new QVBoxLayout(physicalGroup);
     
-    m_colorModeCombo = new QComboBox();
-    m_colorModeCombo->addItem("Solid Color", 0);
-    m_colorModeCombo->addItem("Point Data", 1);
-    m_colorModeCombo->addItem("Cell Data", 2);
-    m_colorModeCombo->addItem("Normal", 3);
-    colorLayout->addWidget(m_colorModeCombo);
+    m_physicalValueCombo = new QComboBox();
+    m_physicalValueCombo->addItem("模型", 0);
+    m_physicalValueCombo->addItem("点数据", 1);
+    m_physicalValueCombo->addItem("单元数据", 2);
+    m_physicalValueCombo->addItem("法向", 3);
+    physicalLayout->addWidget(m_physicalValueCombo);
     
-    QLabel* dataArrayLabel = new QLabel("Data Array:");
+    QLabel* dataArrayLabel = new QLabel("物理量:");
     m_dataArrayCombo = new QComboBox();
     m_dataArrayCombo->setEnabled(false);
-    colorLayout->addWidget(dataArrayLabel);
-    colorLayout->addWidget(m_dataArrayCombo);
+    physicalLayout->addWidget(dataArrayLabel);
+    physicalLayout->addWidget(m_dataArrayCombo);
     
+    layout->addWidget(physicalGroup);
+    //Color Mode Group
+    QGroupBox* colorGroup = new QGroupBox("配色方案");
+    QVBoxLayout* colorLayout = new QVBoxLayout(colorGroup);
+
+    m_colorModeCombo=new QComboBox();
+    m_colorModeCombo->addItem("viridis",0);
+    m_colorModeCombo->addItem("jet",1);
+    m_colorModeCombo->addItem("rainbow",2);
+    colorLayout->addWidget(m_colorModeCombo);
     layout->addWidget(colorGroup);
-    
+
+
     layout->addStretch();
     
     m_controlDock->setWidget(controlWidget);
@@ -114,6 +125,8 @@ void MainWindow::setupConnections()
     
     connect(m_renderModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &MainWindow::onRenderModeChanged);
+    connect(m_physicalValueCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &MainWindow::onPhysicalValueChanged);
     connect(m_colorModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &MainWindow::onColorModeChanged);
     connect(m_dataArrayCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
@@ -165,13 +178,13 @@ void MainWindow::onRenderModeChanged(int index)
     m_glWidget->setRenderMode(static_cast<GLWidget::RenderMode>(index));
 }
 
-void MainWindow::onColorModeChanged(int index)
+void MainWindow::onPhysicalValueChanged(int index)
 {
     m_dataArrayCombo->setEnabled(index == 1 || index == 2);
-    m_glWidget->setColorMode(static_cast<GLWidget::ColorMode>(index));
+    m_glWidget->setPhysicalValue(static_cast<GLWidget::PhysicalData>(index));
     updateDataArrayList();
     
-    // 当切换 colorMode 时，需要重新应用当前选中的数据数组
+
     if (m_dataArrayCombo->count() > 0 && (index == 1 || index == 2)) {
         m_glWidget->setActiveDataArray(m_dataArrayCombo->currentText());
     }
@@ -182,6 +195,11 @@ void MainWindow::onDataArrayChanged(int index)
     if (index >= 0) {
         m_glWidget->setActiveDataArray(m_dataArrayCombo->currentText());
     }
+}
+
+void MainWindow::onColorModeChanged(int index)
+{
+    m_glWidget->setColorMode(static_cast<GLWidget::ColorMode>(index));
 }
 
 void MainWindow::resetCamera()
@@ -212,9 +230,9 @@ void MainWindow::updateDataArrayList()
     m_dataArrayCombo->clear();
     
     QStringList arrays;
-    if (m_colorModeCombo->currentIndex() == 1) {
+    if (m_physicalValueCombo->currentIndex() == 1) {
         arrays = m_glWidget->getPointDataArrayNames();
-    } else if (m_colorModeCombo->currentIndex() == 2) {
+    } else if (m_physicalValueCombo->currentIndex() == 2) {
         arrays = m_glWidget->getCellDataArrayNames();
     }
     

@@ -30,8 +30,9 @@ public:
 private slots:
     void openFile();
     void onRenderModeChanged(int index);
-    void onColorModeChanged(int index);
+    void onPhysicalValueChanged(int index);
     void onDataArrayChanged(int index);
+    void onColorModeChanged(int index);
     void resetCamera();
     void updateStatusBar(const QString& message);
     void onLoadingProgress(int progress);
@@ -54,6 +55,7 @@ private:
     // Dock widget for controls
     QDockWidget* m_controlDock;
     QComboBox* m_renderModeCombo;
+    QComboBox* m_physicalValueCombo;
     QComboBox* m_colorModeCombo;
     QComboBox* m_dataArrayCombo;
     QSlider* m_pointSizeSlider;

@@ -125,6 +125,7 @@ void GLWidget::setupShaders()
     m_normalMatrixLoc = m_meshShader->uniformLocation("normalMatrix");
     m_lightDirLoc = m_meshShader->uniformLocation("lightDir");
     m_solidColorLoc = m_meshShader->uniformLocation("solidColor");
+    m_physicalDataLoc = m_meshShader->uniformLocation("physicalData");
     m_colorModeLoc = m_meshShader->uniformLocation("colorMode");
     m_twoSidedLightingLoc = m_meshShader->uniformLocation("twoSidedLighting");
     
@@ -294,6 +295,7 @@ void GLWidget::renderMesh()
             m_meshShader->setUniformValue("normalMatrix", normalMatrix);
             m_meshShader->setUniformValue("lightDir", m_lightDir);
             m_meshShader->setUniformValue("solidColor", m_solidColor);
+            m_meshShader->setUniformValue("physicalData", static_cast<int>(m_physicalData));
             m_meshShader->setUniformValue("colorMode", static_cast<int>(m_colorMode));
             m_meshShader->setUniformValue("scalarMin", m_meshData.scalarMin);
             m_meshShader->setUniformValue("scalarMax", m_meshData.scalarMax);
@@ -329,6 +331,7 @@ void GLWidget::renderMesh()
             m_meshShader->setUniformValue("normalMatrix", normalMatrix);
             m_meshShader->setUniformValue("lightDir", m_lightDir);
             m_meshShader->setUniformValue("solidColor", m_solidColor);
+            m_meshShader->setUniformValue("physicalData", static_cast<int>(m_physicalData));
             m_meshShader->setUniformValue("colorMode", static_cast<int>(m_colorMode));
             m_meshShader->setUniformValue("scalarMin", m_meshData.scalarMin);
             m_meshShader->setUniformValue("scalarMax", m_meshData.scalarMax);
@@ -353,6 +356,7 @@ void GLWidget::renderMesh()
             m_meshShader->setUniformValue("normalMatrix", normalMatrix);
             m_meshShader->setUniformValue("lightDir", m_lightDir);
             m_meshShader->setUniformValue("solidColor", m_solidColor);
+            m_meshShader->setUniformValue("physicalData", static_cast<int>(m_physicalData));
             m_meshShader->setUniformValue("colorMode", static_cast<int>(m_colorMode));
             m_meshShader->setUniformValue("scalarMin", m_meshData.scalarMin);
             m_meshShader->setUniformValue("scalarMax", m_meshData.scalarMax);
@@ -389,6 +393,7 @@ void GLWidget::renderMesh()
             m_meshShader->setUniformValue("normalMatrix", normalMatrix);
             m_meshShader->setUniformValue("lightDir", m_lightDir);
             m_meshShader->setUniformValue("solidColor", m_solidColor);
+            m_meshShader->setUniformValue("physicalData", static_cast<int>(m_physicalData));
             m_meshShader->setUniformValue("colorMode", static_cast<int>(m_colorMode));
             m_meshShader->setUniformValue("scalarMin", m_meshData.scalarMin);
             m_meshShader->setUniformValue("scalarMax", m_meshData.scalarMax);
@@ -513,9 +518,9 @@ void GLWidget::setRenderMode(RenderMode mode)
     update();
 }
 
-void GLWidget::setColorMode(ColorMode mode)
+void GLWidget::setPhysicalValue(PhysicalData mode)
 {
-    m_colorMode = mode;
+    m_physicalData = mode;
     update();
 }
 
@@ -525,7 +530,7 @@ void GLWidget::setActiveDataArray(const QString& name)
     
     if (!m_grid || name.isEmpty()) return;
     
-    bool isPointData = (m_colorMode == PointData);
+    bool isPointData = (m_physicalData == PointData);
     m_processor.updateScalars(m_meshData, m_grid, name.toStdString(), isPointData);
     
     // Update vertex buffer with new scalar values
@@ -536,6 +541,12 @@ void GLWidget::setActiveDataArray(const QString& name)
     m_vertexBuffer.release();
     doneCurrent();
     
+    update();
+}
+
+void GLWidget::setColorMode(ColorMode mode)
+{
+    m_colorMode= mode;
     update();
 }
 

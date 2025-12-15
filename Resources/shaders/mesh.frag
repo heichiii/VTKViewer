@@ -6,7 +6,8 @@ in float vScalar;
 
 uniform vec3 lightDir;
 uniform vec3 solidColor;
-uniform int colorMode; // 0: solid, 1: point data, 2: cell data, 3: normal
+uniform int physicalData; // 0: solid, 1: point data, 2: cell data, 3: normal
+uniform int colorMode;
 uniform float scalarMin;
 uniform float scalarMax;
 uniform int twoSidedLighting; // 0: 单面, 1: 双面
@@ -89,11 +90,19 @@ void main()
         float alpha = 1.0 - smoothstep(0.8, 1.0, dist);
         
         vec3 baseColor;
-        if (colorMode == 0) {
+        if (physicalData == 0) {
             baseColor = solidColor;
-        } else if (colorMode == 1 || colorMode == 2) {
-            baseColor = viridis(vScalar);
-        } else if (colorMode == 3) {
+        } else if (physicalData == 1 || physicalData == 2) {
+            if(colorMode==0)
+                {baseColor = viridis(vScalar);}
+            else if(colorMode==1)
+                {baseColor = jet(vScalar);}
+            else if(colorMode==2)
+                {baseColor = rainbow(vScalar);}
+            else
+            {baseColor = viridis(vScalar);}
+            // baseColor=viridis(vScalar);
+        } else if (physicalData == 3) {
             baseColor = abs(normalize(vNormal)) * 0.5 + 0.5;
         } else {
             baseColor = solidColor;
@@ -122,12 +131,20 @@ void main()
     
     vec3 baseColor;
     
-    if (colorMode == 0) {
+    if (physicalData == 0) {
         baseColor = solidColor;
-    } else if (colorMode == 1 || colorMode == 2) {
+    } else if (physicalData == 1 || physicalData == 2) {
         // 使用更鲜明的colormap
-        baseColor = viridis(vScalar);  // 可换成 jet(vScalar) 或 rainbow(vScalar)
-    } else if (colorMode == 3) {
+        if(colorMode==0)
+        {baseColor = viridis(vScalar);}
+        else if(colorMode==1)
+        {baseColor = jet(vScalar);}
+        else if(colorMode==2)
+        {baseColor = rainbow(vScalar);}
+        else
+        {baseColor = viridis(vScalar);}
+        // baseColor=viridis(vScalar);
+    } else if (physicalData == 3) {
         baseColor = abs(N) * 0.5 + 0.5;
     } else {
         baseColor = solidColor;
