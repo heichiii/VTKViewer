@@ -120,7 +120,7 @@ private:
     
     // Colors
     QVector3D m_solidColor = QVector3D(0.7f, 0.7f, 0.8f);
-    QVector3D m_wireColor = QVector3D(0.1f, 0.1f, 0.1f);
+    QVector3D m_wireColor = QVector3D(0.1f, 0.5f, 0.5f);
     QVector3D m_lightDir = QVector3D(0.3f, 1.0f, 0.5f).normalized();
     
     bool m_meshLoaded = false;
