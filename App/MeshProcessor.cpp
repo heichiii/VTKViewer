@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <limits>
 #include <numeric>
+#include <QDebug>
+#include <QElapsedTimer>
+#include <QLoggingCategory>
+
 
 #ifdef _MSC_VER
 #include <execution>
@@ -10,6 +14,8 @@
 #else
 #define PAR_SORT(begin, end) std::sort(begin, end)
 #endif
+
+Q_LOGGING_CATEGORY(meshProcessorLog, "VTKViewer.MeshProcessor")
 
 GPUMeshData MeshProcessor::process(const std::shared_ptr<UnstructuredGrid>& grid)
 {
@@ -19,7 +25,10 @@ GPUMeshData MeshProcessor::process(const std::shared_ptr<UnstructuredGrid>& grid
     if (!grid || !grid->points) {
         return result;
     }
-    
+
+    QElapsedTimer loadTimer;
+    loadTimer.start();
+
     // Store data array names
     m_pointDataNames.clear();
     m_cellDataNames.clear();
@@ -56,7 +65,12 @@ GPUMeshData MeshProcessor::process(const std::shared_ptr<UnstructuredGrid>& grid
     
     // Compute bounding box
     computeBoundingBox(positions, numPoints, result.boundingBoxMin, result.boundingBoxMax);
-    
+    qInfo(meshProcessorLog) << "Loaded" << numPoints << "points (" << numComp << " components) in" << loadTimer.elapsed() << "ms";
+    QElapsedTimer meshTimer;
+    meshTimer.start();
+    QElapsedTimer stageTimer;
+    stageTimer.start();
+
     // ============ Step 2: Extract all faces from cells ============
     const auto& cells = grid->cells;
     const auto& cellTypes = grid->cell_types;
@@ -174,11 +188,16 @@ GPUMeshData MeshProcessor::process(const std::shared_ptr<UnstructuredGrid>& grid
         #undef IDX
         cellOffset += (n + 1);
     }
-    
+    qInfo(meshProcessorLog)
+        << "Face extraction" << allFaces.size() << "faces from" << totalCells << "cells in" << stageTimer.elapsed() << "ms";
+    stageTimer.restart();
+
     // ============ Step 3: Sort faces to find unique boundary faces ============
     // Using parallel sort for performance on large meshes
     PAR_SORT(allFaces.begin(), allFaces.end());
-    
+    qInfo(meshProcessorLog) << "Face sorting" << allFaces.size() << "faces in" << stageTimer.elapsed() << "ms";
+    stageTimer.restart();
+
     // ============ Step 4: Extract boundary faces (count == 1) ============
     // A face that appears exactly once is on the boundary
     std::vector<const Face*> boundaryFaces;
@@ -199,7 +218,10 @@ GPUMeshData MeshProcessor::process(const std::shared_ptr<UnstructuredGrid>& grid
         
         i = j;
     }
-    
+    qInfo(meshProcessorLog)
+        << "Boundary selection" << boundaryFaces.size() << "faces in" << stageTimer.elapsed() << "ms";
+    stageTimer.restart();
+
     // ============ Step 5: Generate flat-shaded vertices ============
     // Count total triangles (quads become 2 triangles)
     size_t numTriangles = 0;
@@ -311,7 +333,13 @@ GPUMeshData MeshProcessor::process(const std::shared_ptr<UnstructuredGrid>& grid
     // Triangle indices (sequential for flat shading with glDrawArrays)
     result.triangleIndices.resize(result.vertexCount);
     std::iota(result.triangleIndices.begin(), result.triangleIndices.end(), 0);
-    
+    qInfo(meshProcessorLog)
+        << "Vertex generation" << result.triangleCount << "tris," << result.vertexCount << "verts in"
+        << stageTimer.elapsed() << "ms";
+    qInfo(meshProcessorLog)
+        << "Processed mesh:" << result.triangleCount << "tris," << result.vertexCount << "verts," << result.lineCount << "lines in"
+        << meshTimer.elapsed() << "ms" << "(total" << loadTimer.elapsed() << "ms)";
+
     return result;
 }
 

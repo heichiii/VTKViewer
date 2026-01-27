@@ -3,7 +3,10 @@
 #include <QFile>
 #include <QTextStream>
 #include <QElapsedTimer>
+#include <QLoggingCategory>
 #include <cmath>
+
+Q_LOGGING_CATEGORY(glWidgetLog, "VTKViewer.GLWidget")
 
 GLWidget::GLWidget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -467,6 +470,7 @@ bool GLWidget::loadMesh(const QString& filePath)
     }
     
     qint64 loadTime = timer.elapsed();
+    qInfo(glWidgetLog) << "File load" << filePath << "in" << loadTime << "ms";
     timer.restart();
     
     m_grid = loader->getGrid();
@@ -479,6 +483,7 @@ bool GLWidget::loadMesh(const QString& filePath)
     m_meshData = m_processor.process(m_grid);
     
     qint64 processTime = timer.elapsed();
+    qInfo(glWidgetLog) << "Mesh process" << filePath << "in" << processTime << "ms";
     timer.restart();
     
     // Update OpenGL buffers
@@ -487,7 +492,8 @@ bool GLWidget::loadMesh(const QString& filePath)
     doneCurrent();
     
     qint64 uploadTime = timer.elapsed();
-    
+    qInfo(glWidgetLog) << "GPU upload" << filePath << "in" << uploadTime << "ms";
+
     // Fit camera to model
     m_camera.fitToBox(m_meshData.boundingBoxMin, m_meshData.boundingBoxMax);
     
